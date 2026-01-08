@@ -1,149 +1,122 @@
-# Delta-Hedging-Risk-Simulation-PlatformDelta Hedging & Risk Simulation Platform
+# Delta Hedging & Risk Simulation Platform
 
-An interactive web application for computing Black–Scholes option Greeks and running Monte Carlo delta-hedging simulations to evaluate hedging performance and risk. Built with a FastAPI backend and Next.js frontend.
+An interactive web application for computing **Black–Scholes option Greeks** and running **Monte Carlo delta-hedging simulations** to evaluate hedging performance and risk. Built with a **FastAPI backend** and **Next.js frontend**.
 
-Features
-API-Driven Quant Analytics
+This project emphasizes **API-driven numerical computation**, transforming large stochastic simulations into concise, actionable risk metrics suitable for real-world API consumers.
 
-Greeks + Pricing (Black–Scholes): Compute price + Delta, Gamma, Theta, Vega, Rho for European calls/puts
+---
 
-Delta Hedging Simulation: Simulate a dynamically rebalanced hedged portfolio over GBM paths
+## Features
 
-Risk Summary Output: API returns actionable risk metrics instead of raw simulation dumps:
+### Backend (FastAPI)
+- **Black–Scholes Pricing & Greeks**
+  - Price, Delta, Gamma, Theta, Vega, Rho
+  - European call and put options
+- **Monte Carlo Simulation**
+  - Geometric Brownian Motion (GBM) price paths
+  - Configurable number of paths and rebalancing steps
+- **Delta Hedging Engine**
+  - Dynamic portfolio rebalancing using option delta
+  - Support for long or short option positions
+  - Optional transaction costs
+- **Risk Aggregation**
+  - Mean and standard deviation of PnL
+  - Value at Risk (VaR) and Conditional VaR (CVaR)
+  - Probability of loss
+  - PnL histogram data (bins + counts)
+- **Typed API Contracts**
+  - Validated Pydantic request/response schemas
+  - Auto-generated Swagger documentation
 
-Mean / Std PnL
+### Frontend (Next.js)
+- Parameterized Greeks calculator UI
+- Delta-hedging simulator UI
+- Visualization-ready API responses
+- Clear separation of computation (backend) and presentation (frontend)
 
-VaR / CVaR
+---
 
-Probability of loss
+## Project Structure
 
-PnL histogram bins/counts
-
-Sample Path Output: Returns one representative simulated path (time series) for visualization
-
-Visualizations (Frontend)
-
-Display Greeks output and formatted result cards
-
-Plot-ready data returned from API:
-
-PnL histogram
-
-Sample GBM path + hedge shares/cash series
-
-(Optional) replication error / PnL over time
-
-Project Structure
+```
 Finance App/
 ├── backend/
 │   ├── api/
-│   │   ├── main.py              # FastAPI app + router registration
-│   │   ├── routers/             # Route handlers (greeks, hedge)
+│   │   ├── main.py              # FastAPI app entry point
+│   │   ├── routers/             # API route handlers
 │   │   ├── schemas/             # Pydantic request/response models
-│   │   └── core/                # Quant logic (bs, paths, hedging)
+│   │   └── core/                # Quant logic (BS, paths, hedging)
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── app/                 # Next.js app router pages
-│   │   └── lib/                 # Typed API client + helpers
+│   │   ├── app/                 # Next.js App Router pages
+│   │   └── lib/                 # Typed API client
 │   └── package.json
 └── README.md
+```
 
-Setup Instructions
-Prerequisites
+---
 
-Python 3.10+ recommended (3.12 works)
+## Setup Instructions
 
-Node.js 18+ and npm
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+- npm
 
-Backend Setup
+---
 
-From the project root:
+## Backend Setup
 
+```bash
 cd backend
 pip install -r requirements.txt
 uvicorn api.main:app --reload --port 8000
+```
 
+Backend available at:
+- API: http://127.0.0.1:8000
+- Swagger docs: http://127.0.0.1:8000/docs
 
-Backend runs at:
+---
 
-API: http://127.0.0.1:8000
+## Frontend Setup
 
-Swagger docs: http://127.0.0.1:8000/docs
-
-Frontend Setup
-
-From the project root:
-
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
-
-Frontend runs at:
-
+Frontend available at:
+```
 http://localhost:3000
+```
 
-Running the Application
+---
 
-Terminal 1 (backend):
+## Running the Application
 
+**Terminal 1 (backend):**
+```bash
 cd backend
 uvicorn api.main:app --reload --port 8000
+```
 
-
-Terminal 2 (frontend):
-
+**Terminal 2 (frontend):**
+```bash
 cd frontend
 npm run dev
+```
 
+---
 
-Open:
+## API Endpoints
 
-http://localhost:3000
+### POST `/api/greeks`
+Compute Black–Scholes price and Greeks.
 
-Usage
-Greeks Calculator
-
-Enter parameters:
-
-Initial Stock Price (S₀)
-
-Strike (K)
-
-Risk-Free Rate (r)
-
-Volatility (σ)
-
-Time to Maturity (T)
-
-Option Type (Call/Put)
-
-Click Calculate → backend returns price + Greeks.
-
-Hedging Simulation
-
-Enter simulation parameters:
-
-True volatility vs assumed volatility
-
-Number of paths
-
-Steps per path (rebalancing frequency)
-
-Transaction costs (bps)
-
-Long/short option position
-
-Click Simulate → backend returns PnL risk summary + histogram + sample path.
-
-API Endpoints
-POST /api/greeks
-
-Compute Black–Scholes price + Greeks.
-
-Request Body
-
+```json
 {
   "S0": 100,
   "K": 100,
@@ -152,35 +125,14 @@ Request Body
   "T": 1.0,
   "option_type": "call"
 }
+```
 
+---
 
-Response (example)
+### POST `/api/hedge/simulate`
+Run Monte Carlo GBM paths and delta hedging.
 
-{
-  "price": 10.450583572185565,
-  "greeks": {
-    "delta": 0.6368306511756191,
-    "gamma": 0.018762017345846895,
-    "theta": -6.414027546438197,
-    "vega": 37.52403469169379,
-    "rho": 53.232481545376345
-  },
-  "inputs": {
-    "S0": 100,
-    "K": 100,
-    "r": 0.05,
-    "sigma": 0.2,
-    "T": 1,
-    "option_type": "call"
-  }
-}
-
-POST /api/hedge/simulate
-
-Run Monte Carlo GBM paths + delta hedging and return risk metrics + histogram + sample path.
-
-Request Body
-
+```json
 {
   "S0": 100,
   "K": 100,
@@ -195,19 +147,6 @@ Request Body
   "seed": 1,
   "short_option": true
 }
+```
 
-
-Response (high-level)
-
-{
-  "option_price0": 10.45058,
-  "summary": {
-    "mean_pnl": 0.0062,
-    "std_pnl": 0.4349,
-    "var_95": -0.7182,
-    "cvar_95": -1.0026,
-    "prob_loss": 0.4788
-  },
-  "histogram": { "bin_edges": [...], "counts": [...] },
-  "sample_path": { "t": [...], "S": [...], "delta": [...], "shares": [...], "cash": [...] }
-}
+---
